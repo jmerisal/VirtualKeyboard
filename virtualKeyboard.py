@@ -43,7 +43,7 @@ from operator import itemgetter
 
 class virtualKeyboard(tk.Frame):
     def find_largest_contour(self,contours):
-        print('taavi contribution')
+        
         max_area = 0
         ci=0
         for i in range(len(contours)): #based on area of contours finding the largest
@@ -147,7 +147,7 @@ class virtualKeyboard(tk.Frame):
         
     def __init__(self, root):
         
-        self.cap = cv2.VideoCapture(-1)
+        self.cap = cv2.VideoCapture(0)
         self.ret, self.frame = self.cap.read()
         tk.Frame.__init__(self, sliders)
         #Sliders for thresholding input image
