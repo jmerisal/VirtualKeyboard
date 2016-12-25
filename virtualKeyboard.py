@@ -42,6 +42,16 @@ from numpy import sqrt
 from operator import itemgetter
 
 class virtualKeyboard(tk.Frame):
+    def find_largest_contour(self,contours):
+        max_area = 0
+        ci=0
+        for i in range(len(contours)): #based on area of contours finding the largest
+            cnt=contours[i]
+            area = cv2.contourArea(cnt)
+            if(area>max_area):
+                max_area=area
+                ci=i        
+        return contours[ci]
     
     def updateFrame(self):
      self.ret, self.frame = self.cap.read()
@@ -62,7 +72,7 @@ class virtualKeyboard(tk.Frame):
      # Threshold the HSV image to get only blue colors
      mask = cv2.inRange(self.hsv, lower_c, upper_c)
     
-     #Morphological "opening"
+     #Morphological "opening and closing"
      mask = cv2.erode(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))) #eroding the image
      mask = cv2.dilate(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))) #dilating the image
      mask = cv2.dilate(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))) #dilating the image
@@ -75,15 +85,9 @@ class virtualKeyboard(tk.Frame):
      
      _, contours, _ = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
      if len(contours)!=0:    #if there are contours then do sth
-         max_area = 0
-         ci=0
-         for i in range(len(contours)): #based on area of contours finding the largest
-            cnt=contours[i]
-            area = cv2.contourArea(cnt)
-            if(area>max_area):
-                max_area=area
-                ci=i
-         cnt=contours[ci]   
+        
+         #finding largest contour
+         cnt=self.find_largest_contour(contours)   
              
          #finding convex hull
          hull = cv2.convexHull(cnt)
