@@ -42,6 +42,7 @@ from numpy import sqrt
 from operator import itemgetter
 
 class virtualKeyboard(tk.Frame):
+    
     def find_largest_contour(self,contours):
         max_area = 0
         ci=0
@@ -56,10 +57,11 @@ class virtualKeyboard(tk.Frame):
     def updateFrame(self):
      self.ret, self.frame = self.cap.read()
      self.frame=cv2.flip(self.frame,-1) #rotating 180deg
+     cv2.imshow('ORIGINAL',self.frame)
      self.frame = cv2.medianBlur(self.frame,17)
      # Our operations on the frame come here
      self.hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-     # define range of blue color in HSV
+     # define range of skin color in HSV
      hmin=self.h_min.get()
      hmax=self.h_max.get()
      smin=self.s_min.get()
@@ -69,7 +71,7 @@ class virtualKeyboard(tk.Frame):
      lower_c = np.array([hmin,smin,vmin])
      upper_c = np.array([hmax,smax,vmax])
     
-     # Threshold the HSV image to get only blue colors
+     # Threshold the HSV image to get only skin colors
      mask = cv2.inRange(self.hsv, lower_c, upper_c)
     
      #Morphological "opening and closing"
