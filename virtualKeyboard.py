@@ -5,6 +5,7 @@ Course project in Digital image processing
 VR keyboard
 @author: Joonas
 """
+import DrawableKeyboard
 """
 import numpy as np
 import cv2
@@ -40,6 +41,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from numpy import sqrt
 from operator import itemgetter
+from DrawableKeyboard import DrawableKeyboard
 
 class virtualKeyboard(tk.Frame):
     def find_largest_contour(self,contours):
@@ -55,7 +57,14 @@ class virtualKeyboard(tk.Frame):
         return contours[ci]
     
     def updateFrame(self):
+     
+       
+        
      self.ret, self.frame = self.cap.read()
+     
+
+     if self.flip_image_upside_down:
+         self.frame=cv2.flip(self.frame,0)
      self.frame=cv2.flip(self.frame,-1) #rotating 180deg
      self.frame = cv2.medianBlur(self.frame,17)
      # Our operations on the frame come here
@@ -80,6 +89,7 @@ class virtualKeyboard(tk.Frame):
      mask = cv2.erode(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))) #eroding the image
      #smooth it with median filter
      mask = cv2.GaussianBlur(mask,(5,5),0)
+      
      cv2.imshow('mask',mask)
      # Bitwise-AND mask and original image
      res = cv2.bitwise_and(self.frame,self.frame, mask= mask)
@@ -125,6 +135,8 @@ class virtualKeyboard(tk.Frame):
          self.frame = cv2.add(self.frame,tempImage)
          #cv2.drawContours(frame,contours,-1,(0,255,0),3)    
          cv2.drawContours(self.frame,[hull],0,(0,0,255),3) #red color - marks hands
+         
+     self.keyboard.drawKeyboard(self.frame)
      # Display the resulting frame
      cv2.imshow('frame',self.frame)
      
@@ -147,10 +159,11 @@ class virtualKeyboard(tk.Frame):
         
     def __init__(self, root):
         
+        self.keyboard=DrawableKeyboard()
         self.cap = cv2.VideoCapture(0)
         self.ret, self.frame = self.cap.read()
         tk.Frame.__init__(self, sliders)
-        #Sliders for thresholding input image
+        #Sliders for thresholding input image       
         self.h_min = Scale(sliders,from_=0, to=180,resolution=1,showvalue=1, label='H_min', orient=HORIZONTAL)
         self.h_min.grid(row=0, column=0)
         self.h_min.set(0)
@@ -171,6 +184,11 @@ class virtualKeyboard(tk.Frame):
         self.v_max = Scale(sliders,from_=0, to=255,resolution=1,showvalue=1, label='V_max', orient=HORIZONTAL)
         self.v_max.grid(row=5, column=0)
         self.v_max.set(255)
+        
+        self.flip_image_upside_down = IntVar()
+        self.flip_image_upside_down_checkbutton= Checkbutton(sliders, text="Flip image upside down", variable=self.flip_image_upside_down).grid(row=6,column=0)
+        
+        
             
         
         self.canvas = Canvas(sliders, width=100, height=75)
