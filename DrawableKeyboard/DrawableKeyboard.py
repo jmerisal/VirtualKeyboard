@@ -10,7 +10,11 @@ class DrawableKeyboard:
      
         self.font = cv2.FONT_HERSHEY_COMPLEX_SMALL
         self.buttonGap=15
-        
+        self.symbols=[['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p','/'],
+                      ['<<<','a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',',','>>>'],
+                      ['shift','z', 'x', 'c', 'v', 'b', 'n', 'm','.','?','[1,2,3]'],
+                      ['@','#','%','*','[ space ]','+','-','=']
+                      ]
         self.alpha = {
             'row1' : ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p','/'],
             'row2' : ['<<<','a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',',','>>>'],
@@ -18,7 +22,21 @@ class DrawableKeyboard:
             'row4' : ['@','#','%','*','[ space ]','+','-','=']
             }
         self.keyboard={}
+        self.createButtons()
+        
+    def createButtons(self):
+        i=1
+        for row in self.symbols:
+            buttonRow=[]
+            for symbol in row:
+                button=DrawableButton(letter=symbol,font=self.font)
+                buttonRow.append(button)
+            from _ast import Str
+            rowIndicator="row"+str(i)
+            self.keyboard[rowIndicator]=buttonRow
+            i+=1
     
+        
     def drawRow(self,row,rowXCoordinate,rowYCoordinate, img):
         buttonXCoordinate=rowXCoordinate
         buttonYCoordinate=rowYCoordinate                   # for readability and functionality
@@ -31,33 +49,38 @@ class DrawableKeyboard:
             buttonXCoordinate+=button.width+self.buttonGap
     
     def drawKeyboard(self,img):
-        #=======================================================================
-        # button=DrawableButton('[ space ]',self.font)
-        # button.drawButton(img)
-         
-        #=======================================================================
-        #row='row4'
-        #self.drawRow(row=row, rowXCoordinate=40, rowYCoordinate=40, img=img)
-        
-        rowYCoordinate=40
-          
-        for row in self.alpha.keys():
-            #print(row)
-          
-            self.drawRow(row=row, rowXCoordinate=40, rowYCoordinate=rowYCoordinate, img=img)
-            rowYCoordinate+=40+self.buttonGap
-          
-        print("    ")     
-        print("    ")       
-    def selectButton(self, xCoordinate,yCoordinate,img):
-        for boundingBox in self.keyboard.keys():
+        keyBoardRowLeftXCoordinate=40
+        keyBoardRowLeftYCoordinate=40
+        buttonYCoordinate=keyBoardRowLeftYCoordinate
+        for row in sorted(self.keyboard.keys()):
+            buttonXCoordinate=keyBoardRowLeftXCoordinate
             
-            if self.isInBounds(xCoordinate, yCoordinate, boundingBox):
-                self.keyboard[boundingBox].select()
+            for button in self.keyboard[row]:
+                
+                button.drawButton(img, x=buttonXCoordinate, y=buttonYCoordinate)
+                buttonXCoordinate+=button.width+self.buttonGap
+            
+            buttonYCoordinate+=40+self.buttonGap
         
         
-    def isInBounds(self,xCoordinate,yCoordinate,boundingBox):
-        if boundingBox[0][0]<xCoordinate<boundingBox[1][0] and boundingBox[1][1]<yCoordinate<boundingBox[0][1] :
-            return True
         
-        return False
+    
+    def selectButton(self, xCoordinate,yCoordinate,img):
+        for row in self.keyboard.keys():
+            for button in self.keyboard[row]:
+                boundingBox=button.boundingBox
+                if boundingBox[0][0]<xCoordinate<boundingBox[1][0] and boundingBox[1][1]<yCoordinate<boundingBox[0][1] :
+                    button.isSelected=True
+                    print(button.letter)
+                else:
+                    button.isSelected=False
+                    
+        #=======================================================================
+        # for boundingBox in self.keyboard.keys():
+        #     
+        #     if self.isInBounds(xCoordinate, yCoordinate, boundingBox):
+        #         self.keyboard[boundingBox].select()
+        # 
+        #=======================================================================
+        return 1
+ 
