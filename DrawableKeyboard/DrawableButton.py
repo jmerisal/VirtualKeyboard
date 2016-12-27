@@ -17,17 +17,27 @@ class DrawableButton():
         self.pixelsPerCharacter=15
         self.width=len(self.letter)*self.pixelsPerCharacter+self.pixelsPerCharacter
         self.height=self.pixelsPerCharacter
-    def drawButton(self,img,x=40,y=40):
+        self.boundingBox=((0,0),(0,0))
+        
+    def drawButton(self,img,x=200,y=200):
         height, width, channels = img.shape
+        self.x=x
+        self.y=y
+        if self.isSelected:
+            self.backgroundFill=cv2.FILLED
         
-        cv2.rectangle(img, (x-self.pixelsPerCharacter, y+self.pixelsPerCharacter), (x+round((self.width)*self.fontSize), y-self.height), (0,0,0), thickness=self.backgroundFill)
-         
+        
+        cv2.rectangle(img, (self.x-self.pixelsPerCharacter, self.y+self.pixelsPerCharacter), (self.x+round((self.width)*self.fontSize), self.y-self.height), (0,0,0), thickness=self.backgroundFill)
         cv2.putText(img=img,text=self.letter,org=(x,y), fontFace = self.font, fontScale=self.fontSize, color=self.color, thickness= 1,lineType= cv2.LINE_AA)
-        
+        self.boundingBox=(x-self.pixelsPerCharacter, y+self.pixelsPerCharacter), (x+round((self.width)*self.fontSize), y-self.height)
     def select(self):
+        self.isSelected=True
         self.backgroundFill=cv2.FILLED
+        print("button selected: ", self.letter)
+       
         
-    def deselect(self):
+    def deselect(self,img):
         self.backgroundFill=1
+        self.drawButton(img, self.x, self.y)
         
         

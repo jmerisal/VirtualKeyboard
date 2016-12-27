@@ -128,6 +128,9 @@ class virtualKeyboard(tk.Frame):
            if distance>50 and y>-120 and thumb_rule : #if points are not too close and new point is not too much "lower"
                    cv2.circle(tempImage,tuple(h[0]),10,(0,255,255),2) #yellow - marks convex hull pts i.e. fingertips
                    cv2.putText(tempImage,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
+                   if i ==1:
+                       #print("1st finger position", h[0])
+                       self.keyboard.selectButton(xCoordinate=h[0][0], yCoordinate=h[0][1],img=tempImage)
                    i+=1
                    last = tuple(h[0])
           
