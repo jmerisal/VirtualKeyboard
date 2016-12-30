@@ -5,6 +5,7 @@ Course project in Digital image processing
 VR keyboard
 @author: Joonas
 """
+import DrawableKeyboard
 """
 import numpy as np
 import cv2
@@ -40,6 +41,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from numpy import sqrt
 from operator import itemgetter
+from DrawableKeyboard import DrawableKeyboard
 
 class virtualKeyboard(tk.Frame):
     
@@ -56,7 +58,14 @@ class virtualKeyboard(tk.Frame):
         return contours[ci]
     
     def updateFrame(self):
+     
+       
+        
      self.ret, self.frame = self.cap.read()
+     
+
+     if self.flip_image_upside_down:
+         self.frame=cv2.flip(self.frame,0)
      self.frame=cv2.flip(self.frame,-1) #rotating 180deg
      cv2.imshow('ORIGINAL',self.frame)
      self.frame = cv2.medianBlur(self.frame,17)
@@ -82,6 +91,7 @@ class virtualKeyboard(tk.Frame):
      mask = cv2.erode(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))) #eroding the image
      #smooth it with median filter
      mask = cv2.GaussianBlur(mask,(5,5),0)
+      
      cv2.imshow('mask',mask)
      # Bitwise-AND mask and original image
      res = cv2.bitwise_and(self.frame,self.frame, mask= mask)
@@ -120,6 +130,9 @@ class virtualKeyboard(tk.Frame):
            if distance>50 and y>-120 and thumb_rule : #if points are not too close and new point is not too much "lower"
                    cv2.circle(tempImage,tuple(h[0]),10,(0,255,255),2) #yellow - marks convex hull pts i.e. fingertips
                    cv2.putText(tempImage,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
+                   if i ==1:
+                       #print("1st finger position", h[0])
+                       self.keyboard.selectButton(xCoordinate=h[0][0], yCoordinate=h[0][1],img=tempImage)
                    i+=1
                    last = tuple(h[0])
           
@@ -127,6 +140,8 @@ class virtualKeyboard(tk.Frame):
          self.frame = cv2.add(self.frame,tempImage)
          #cv2.drawContours(frame,contours,-1,(0,255,0),3)    
          cv2.drawContours(self.frame,[hull],0,(0,0,255),3) #red color - marks hands
+         
+     self.keyboard.drawKeyboard(self.frame)
      # Display the resulting frame
      cv2.imshow('frame',self.frame)
      
@@ -149,10 +164,11 @@ class virtualKeyboard(tk.Frame):
         
     def __init__(self, root):
         
+        self.keyboard=DrawableKeyboard()
         self.cap = cv2.VideoCapture(0)
         self.ret, self.frame = self.cap.read()
         tk.Frame.__init__(self, sliders)
-        #Sliders for thresholding input image
+        #Sliders for thresholding input image       
         self.h_min = Scale(sliders,from_=0, to=180,resolution=1,showvalue=1, label='H_min', orient=HORIZONTAL)
         self.h_min.grid(row=0, column=0)
         self.h_min.set(0)
@@ -173,6 +189,11 @@ class virtualKeyboard(tk.Frame):
         self.v_max = Scale(sliders,from_=0, to=255,resolution=1,showvalue=1, label='V_max', orient=HORIZONTAL)
         self.v_max.grid(row=5, column=0)
         self.v_max.set(255)
+        
+        self.flip_image_upside_down = IntVar()
+        self.flip_image_upside_down_checkbutton= Checkbutton(sliders, text="Flip image upside down", variable=self.flip_image_upside_down).grid(row=6,column=0)
+        
+        
             
         
         self.canvas = Canvas(sliders, width=100, height=75)
