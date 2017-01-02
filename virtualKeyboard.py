@@ -135,16 +135,14 @@ class virtualKeyboard(tk.Frame):
                    cv2.circle(tempImage,tuple(h[0]),5,(255,255,255),-1) #yellow - marks convex hull pts i.e. fingertips
                    cv2.circle(tempImage2,tuple(h[0]),30,(255,255,255),-1)
                    cv2.putText(self.frame,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
-                   #if i ==1:
-                       #print("1st finger position", h[0])
-                       #self.keyboard.selectButton(xCoordinate=h[0][0], yCoordinate=h[0][1],img=tempImage)
                    i+=1
                    last = tuple(h[0])
          if i==5:
              self.five_fingers = tempImage
              _,self.five_fingers = cv2.threshold(self.five_fingers,127,255,0)
+             self.click_enabled = True # hand in selecting position click allowed
              
-         if i==4:
+         if i==4 and self.click_enabled: #if one finger is missing then its a click, click_enabled assures one click to letter
              self.five_fingers=cv2.subtract(self.five_fingers,tempImage2)
              gray = cv2.cvtColor(self.five_fingers, cv2.COLOR_BGR2GRAY)
              _, cnt, _ = cv2.findContours(gray,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -154,7 +152,8 @@ class virtualKeyboard(tk.Frame):
                  radius = int(radius)
                  cv2.circle(self.frame,center,radius,(0,255,0),2)
                  self.keyboard.selectButton(xCoordinate=int(x), yCoordinate=int(y),img=tempImage)
-          
+                 self.click_enabled = False # one click limited to one letter
+                 
          self.frame = cv2.add(self.frame,tempImage)
          #cv2.drawContours(frame,contours,-1,(0,255,0),3) #this would draw the hand contour    
          cv2.drawContours(self.frame,[hull],0,(0,0,255),1) #red color - marks hands
