@@ -65,8 +65,8 @@ class virtualKeyboard(tk.Frame):
      
 
      if self.flip_image_upside_down:
-         self.frame=cv2.flip(self.frame,0)
-     self.frame=cv2.flip(self.frame,-1) #rotating 180deg
+         #self.frame=cv2.flip(self.frame,0)
+         self.frame=cv2.flip(self.frame,-1) #rotating 180deg
      cv2.imshow('ORIGINAL',self.frame)
      self.frame = cv2.medianBlur(self.frame,17)
      # Our operations on the frame come here
@@ -110,36 +110,54 @@ class virtualKeyboard(tk.Frame):
          # ugly way to create empty image of the same size -from some random code :) 
          tempImage = self.frame.copy()
          tempImage = cv2.subtract(tempImage,self.frame)
+         tempImage2 = self.frame.copy()
+         tempImage2 = cv2.subtract(tempImage,self.frame)
          last = None
          i=0
          for h in left_to_right:
           if last==None:
-           cv2.circle(tempImage,tuple(h[0]),5,(0,255,255),2) #0,255,255 - bgr value for yellow - marks convex hull pts i.e. fingertips
-           cv2.putText(tempImage,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
-           i+=1
-           last = tuple(h[0])
+           if h[0][1]<470:
+               cv2.circle(tempImage,tuple(h[0]),5,(255,255,255),-1) #0,255,255 - bgr value for yellow - marks convex hull pts i.e. fingertips
+               cv2.circle(tempImage2,tuple(h[0]),30,(255,255,255),-1)
+               cv2.putText(self.frame,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
+               i+=1
+               last = tuple(h[0])
           else:
            x = last[0]-tuple(h[0])[0]
            y = last[1]-tuple(h[0])[1]
            distance = sqrt(abs(x)**2+abs(y)**2) #distance between prev and current location
            #thumb rule means that index finger is always higher than thumb
            thumb_rule=True
-           if i==1 and y<30:
+           if i==1 and y<35: #if index finger is not far enough from thumb then its not index finger
               thumb_rule=False
                        
            if distance>50 and y>-120 and thumb_rule : #if points are not too close and new point is not too much "lower"
-                   cv2.circle(tempImage,tuple(h[0]),10,(0,255,255),2) #yellow - marks convex hull pts i.e. fingertips
-                   cv2.putText(tempImage,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
-                   if i ==1:
+                   cv2.circle(tempImage,tuple(h[0]),5,(255,255,255),-1) #yellow - marks convex hull pts i.e. fingertips
+                   cv2.circle(tempImage2,tuple(h[0]),30,(255,255,255),-1)
+                   cv2.putText(self.frame,str(i),tuple(h[0]),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255))
+                   #if i ==1:
                        #print("1st finger position", h[0])
-                       self.keyboard.selectButton(xCoordinate=h[0][0], yCoordinate=h[0][1],img=tempImage)
+                       #self.keyboard.selectButton(xCoordinate=h[0][0], yCoordinate=h[0][1],img=tempImage)
                    i+=1
                    last = tuple(h[0])
+         if i==5:
+             self.five_fingers = tempImage
+             _,self.five_fingers = cv2.threshold(self.five_fingers,127,255,0)
+             
+         if i==4:
+             self.five_fingers=cv2.subtract(self.five_fingers,tempImage2)
+             gray = cv2.cvtColor(self.five_fingers, cv2.COLOR_BGR2GRAY)
+             _, cnt, _ = cv2.findContours(gray,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+             if len(cnt)==1:
+                 (x,y),radius = cv2.minEnclosingCircle(cnt[0])
+                 center = (int(x),int(y))
+                 radius = int(radius)
+                 cv2.circle(self.frame,center,radius,(0,255,0),2)
+                 self.keyboard.selectButton(xCoordinate=int(x), yCoordinate=int(y),img=tempImage)
           
-        
          self.frame = cv2.add(self.frame,tempImage)
-         #cv2.drawContours(frame,contours,-1,(0,255,0),3)    
-         cv2.drawContours(self.frame,[hull],0,(0,0,255),3) #red color - marks hands
+         #cv2.drawContours(frame,contours,-1,(0,255,0),3) #this would draw the hand contour    
+         cv2.drawContours(self.frame,[hull],0,(0,0,255),1) #red color - marks hands
          
      self.keyboard.drawKeyboard(self.frame)
      # Display the resulting frame
@@ -165,8 +183,11 @@ class virtualKeyboard(tk.Frame):
     def __init__(self, root):
         
         self.keyboard=DrawableKeyboard()
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.ret, self.frame = self.cap.read()
+        
+        self.five_fingers = self.frame.copy()
+        self.five_fingers = cv2.subtract(self.five_fingers,self.frame)
         tk.Frame.__init__(self, sliders)
         #Sliders for thresholding input image       
         self.h_min = Scale(sliders,from_=0, to=180,resolution=1,showvalue=1, label='H_min', orient=HORIZONTAL)
