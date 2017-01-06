@@ -4,6 +4,15 @@ Created on Tue Dec  6 13:57:06 2016
 Course project in Digital image processing
 VR keyboard
 @author: Joonas and Taavi
+
+Progress: Programm works with three middle fingers (starting from index finger)
+To do: 
+thresholding/ Taavi
+contour numbering logic should be overviewed/ Joonas (ideas are welcome)
+displayed picture should be resizeable/ Joonas/Taavi
+
+should it work if half of the hand goes out of camera view? (maybe its my cam problem (too low visibility angle) )
+
 """
 import DrawableKeyboard
 
@@ -44,7 +53,7 @@ class virtualKeyboard(tk.Frame):
      if self.flip_image_upside_down:
          #self.frame=cv2.flip(self.frame,0)
          self.frame=cv2.flip(self.frame,-1) #rotating 180deg
-     cv2.imshow('ORIGINAL',self.frame)
+     #cv2.imshow('ORIGINAL',self.frame)
      self.frame = cv2.medianBlur(self.frame,17)
      # Our operations on the frame come here
      self.hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
@@ -139,7 +148,7 @@ class virtualKeyboard(tk.Frame):
      # Display the resulting frame
      cv2.imshow('frame',self.frame)
      
-     cv2.imshow('res',res)
+     #cv2.imshow('res',res)
     
      # Display the resulting frame
      
