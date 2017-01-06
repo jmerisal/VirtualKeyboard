@@ -3,32 +3,9 @@
 Created on Tue Dec  6 13:57:06 2016
 Course project in Digital image processing
 VR keyboard
-@author: Joonas
+@author: Joonas and Taavi
 """
 import DrawableKeyboard
-"""
-import numpy as np
-import cv2
-
-cap = cv2.VideoCapture(0)
-
-while(True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-
-    # Our operations on the frame come here
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # Display the resulting frame
-    cv2.imshow('frame',frame)
-    cv2.imshow('hsv',hsv)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()
-"""
 
 import tkinter as tk
 import cv2
@@ -231,29 +208,3 @@ if __name__ == "__main__":
     # LIVE
     
     sliders.mainloop()
-"""
-from PIL import ImageTk, Image
- 
-width, height = 800, 600
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
- 
-root = tk.Tk()
-root.bind('q', lambda e: root.quit())
-lmain = tk.Label(root)
-lmain.pack()
- 
-def show_frame():
-    _, frame = cap.read()
-    frame = cv2.flip(frame, 1)
-    cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    img = Image.fromarray(cv2image)
-    imgtk = ImageTk.PhotoImage(image=img)
-    lmain.imgtk = imgtk
-    lmain.configure(image=imgtk)
-    lmain.after(10, show_frame)
- 
-show_frame()
-root.mainloop()
-"""
