@@ -80,7 +80,7 @@ class virtualKeyboard(tk.Frame):
       
      cv2.imshow('mask',mask)
      # Bitwise-AND mask and original image
-     res = cv2.bitwise_and(self.frame,self.frame, mask= mask)
+     #res = cv2.bitwise_and(self.frame,self.frame, mask= mask)
      
      _, contours, _ = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
      if len(contours)!=0:    #if there are contours then do sth
@@ -173,6 +173,7 @@ class virtualKeyboard(tk.Frame):
         
         self.five_fingers = self.frame.copy()
         self.five_fingers = cv2.subtract(self.five_fingers,self.frame)
+        self.click_enabled = True
         tk.Frame.__init__(self, sliders)
         #Sliders for thresholding input image       
         self.h_min = Scale(sliders,from_=0, to=180,resolution=1,showvalue=1, label='H_min', orient=HORIZONTAL)
